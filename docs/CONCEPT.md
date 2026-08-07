@@ -1,0 +1,172 @@
+# TechWissen – Produktkonzept
+
+## Produktidee
+
+**TechWissen** ist eine deutschsprachige Wissensbasis für Software- und Servertechnologien. Der Schwerpunkt liegt nicht auf kurzen Copy-and-paste-Snippets, sondern auf nachvollziehbaren technischen Artikeln mit Architektur, Sicherheitsaspekten, Konfiguration und konkreten Beispielen.
+
+Der erste Artikel ist die Anleitung **„Universelle Docker-Entwicklungsumgebung auf Contabo mit Dokploy“**.
+
+## Zielgruppen
+
+1. Anwendungsentwickler, die Server- und DevOps-Themen praktisch verstehen wollen.
+2. Self-Hosting-Nutzer mit VPS/VDS/Dedicated Servern.
+3. Entwickler, die reproduzierbare Entwicklungs- und Deployment-Umgebungen aufbauen.
+4. Fortgeschrittene Einsteiger, die Zusammenhänge zwischen Frontend, Backend, Datenbank, Netzwerk und Infrastruktur lernen wollen.
+
+## Informationsarchitektur
+
+### Hauptbereiche
+
+- **Server & Hosting** – Linux, VPS, SSH, Reverse Proxy, DNS, TLS, Firewalls
+- **Softwareentwicklung** – Node.js, Java, Python, IDEs, Toolchains, APIs
+- **Datenbanken** – PostgreSQL, Redis, SQL, Migrationen, Backups, Performance
+- **DevOps** – Docker, Compose, Dokploy, CI/CD, GitHub Actions, Observability
+
+### Artikel-Metadaten
+
+Jeder Artikel besitzt:
+
+- Titel
+- eindeutigen Slug
+- Kurzbeschreibung
+- Markdown-Inhalt
+- Kategorie
+- Schwierigkeitsgrad
+- geschätzte Lesezeit
+- Tags
+- Veröffentlichungs- und Änderungsdatum
+- Featured-Status
+
+## UX-Konzept
+
+### Startseite
+
+Die Startseite dient gleichzeitig als Landingpage und Wissensindex:
+
+1. Hero mit klarer Positionierung.
+2. Volltextsuche.
+3. Themenbereiche mit Artikelanzahl.
+4. Featured-Artikel als prominentester Einstieg.
+5. Artikelliste mit Kategorie, Tags, Schwierigkeit und Lesezeit.
+6. Erläuterung des redaktionellen Ansatzes.
+
+### Artikelseite
+
+Eine Artikelseite enthält:
+
+- Kategorie und Tags
+- Titel und Kurzbeschreibung
+- Lesezeit und Schwierigkeit
+- automatisch erzeugtes Inhaltsverzeichnis
+- Markdown mit Tabellen, Listen und Codeblöcken
+- Kopierfunktion für Codeblöcke
+- responsive Darstellung für Desktop, Tablet und Smartphone
+
+## Technische Architektur
+
+```text
+Browser
+   │
+   │ HTTPS
+   ▼
+Dokploy / Traefik
+   │
+   ▼
+Nginx Frontend :80
+   │
+   ├── React SPA
+   │
+   └── /api/* ─────► Node.js / Express :3000
+                         │
+                         ▼
+                    PostgreSQL :5432
+```
+
+Nur das Frontend ist über Traefik erreichbar. Backend und Datenbank befinden sich ausschließlich im internen Docker-Netz.
+
+## Backend-API
+
+Die erste Version ist bewusst read-only:
+
+- `GET /api/health`
+- `GET /api/categories`
+- `GET /api/articles`
+- `GET /api/articles?search=...`
+- `GET /api/articles?category=...`
+- `GET /api/articles/:slug`
+
+Dadurch existiert zunächst keine ungeschützte Schreibschnittstelle.
+
+## Datenhaltung
+
+PostgreSQL verwaltet Kategorien, Artikel und Tags relational. Der Artikeltext liegt als Markdown in der Datenbank. Das bietet zwei Vorteile:
+
+1. Inhalte bleiben unabhängig vom React-Build.
+2. Später kann ein Adminbereich Inhalte direkt bearbeiten, ohne das Frontend neu zu deployen.
+
+Der erste Artikel wird beim initialen Start aus einer Markdown-Datei geseedet. Ist der Artikel bereits vorhanden, wird er beim Neustart nicht überschrieben.
+
+## Sicherheitskonzept der ersten Version
+
+- PostgreSQL besitzt keine Host-Port-Freigabe.
+- Das Backend besitzt keine Host-Port-Freigabe.
+- Nginx proxyt `/api` intern zum Backend.
+- Produktiv wird der Frontend-Port über Dokploy/Traefik geroutet.
+- Datenbankpasswort ist eine erforderliche Environment Variable.
+- React-Markdown rendert kein ungeprüftes Raw HTML.
+- Nginx setzt grundlegende Security Header und eine restriktive Content Security Policy.
+- Express setzt zusätzliche Security Header über Helmet.
+
+## Vorgesehene Ausbaustufen
+
+### Phase 2 – Redaktion
+
+- Administrator-Login
+- Rollen und Berechtigungen
+- Markdown-Editor mit Live-Vorschau
+- Draft/Published-Workflow
+- Artikel erstellen, ändern und archivieren
+- SEO-Titel und Meta-Description
+- Titelbilder und Assets
+
+### Phase 3 – Wissensnavigation
+
+- verwandte Artikel
+- Serien und Lernpfade
+- Tag-Seiten
+- „Nächster Artikel“-Navigation
+- PostgreSQL Full Text Search
+- Suchvorschläge
+
+### Phase 4 – Betrieb
+
+- automatisierte Datenbank-Backups
+- strukturierte Migrationen mit eigener Migrationstabelle/Tool
+- CI/CD-Pipeline
+- Health-/Readiness-Monitoring
+- Logging und Fehlertracking
+- Rate Limiting für öffentliche API-Endpunkte
+
+### Phase 5 – Benutzerfunktionen
+
+Nur falls später benötigt:
+
+- Benutzerkonten
+- Lesezeichen
+- Lesefortschritt
+- Kommentare oder Feedback
+- persönliche Lernlisten
+
+## Designrichtung
+
+Das Interface verwendet eine dunkle, sachliche Entwickler-Ästhetik mit:
+
+- hoher typografischer Hierarchie
+- monochromen Flächen
+- dezenten Gittern und Terminal-Anspielungen
+- Grün als primärer technischer Akzent
+- Blau als sekundärer Akzent
+- wenig dekorativen Elementen
+- Fokus auf langen, gut lesbaren Fachartikeln
+
+Die Gestaltung soll wie eine technische Dokumentationsplattform wirken, nicht wie ein Marketing-Blog.
