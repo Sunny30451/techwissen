@@ -105,6 +105,24 @@ docker compose -f docker-compose.yml -f docker-compose.local.yml down -v
 
 Das Produktions-Compose veröffentlicht absichtlich keinen Host-Port. Dokploy/Traefik routet intern direkt auf Port `80` des Frontend-Containers. Dadurch bleiben Backend (`3000`) und PostgreSQL (`5432`) ausschließlich im internen Docker-Netz.
 
+### Deployment unter einem URL-Pfad
+
+Wenn die Anwendung nicht auf der Domain-Wurzel, sondern beispielsweise unter `https://example.com/tech` erreichbar sein soll, muss in Dokploy gesetzt werden:
+
+```env
+APP_BASE_URL=/tech
+```
+
+Der Wert muss dem öffentlichen Pfad aus der Dokploy-Domainkonfiguration entsprechen. Für ein Deployment auf der Domain-Wurzel bleibt der Wert `/`. `APP_BASE_URL` wird sowohl beim Vite-Build als auch zur Laufzeit von Nginx verwendet; nach einer Änderung ist deshalb ein vollständiger Rebuild erforderlich, ein reiner Container-Neustart reicht nicht.
+
+Empfohlene Dokploy-Domainkonfiguration für das Beispiel:
+
+- **Path:** `/tech`
+- **Container Port:** `80`
+- **Strip Path:** aktiviert
+
+Nginx akzeptiert vorsorglich beide Varianten, sodass die Anwendung auch funktioniert, wenn Dokploy den Pfad nicht entfernt. Nach dem Deployment müssen `/tech/`, `/tech/assets/...`, `/tech/api/health` und ein Deep Link unter `/tech/artikel/...` erreichbar sein.
+
 ## API
 
 ### Healthcheck
