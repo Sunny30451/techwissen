@@ -5,6 +5,7 @@ import { pool } from './db.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const articlePath = path.resolve(__dirname, '../content/dev-container-guide.md');
+const ollamaArticlePath = path.resolve(__dirname, '../content/ollama-dokploy-contabo.md');
 
 export async function migrateAndSeed() {
   await pool.query(`
@@ -113,6 +114,59 @@ export async function migrateAndSeed() {
       `INSERT INTO article_tags (article_id, tag_id)
        VALUES ($1, $2) ON CONFLICT DO NOTHING`,
       [article.rows[0].id, inserted.rows[0].id]
+    );
+  }
+
+  // Zweiter quellversionierter TechWissen-Artikel: Ollama auf Dokploy.
+  // ON CONFLICT DO NOTHING bewahrt spätere redaktionelle Änderungen in der DB.
+  const ollamaContent = await readFile(ollamaArticlePath, 'utf8');
+
+  let ollamaArticle = await pool.query(
+    `INSERT INTO articles
+      (title, slug, excerpt, content_markdown, category_id, difficulty,
+       reading_time_minutes, featured, published_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, FALSE, '2026-08-09T12:00:00+02:00')
+     ON CONFLICT (slug) DO NOTHING
+     RETURNING id`,
+    [
+      'Ollama sicher mit Docker und Dokploy auf einem Contabo VPS bereitstellen',
+      'ollama-docker-dokploy-contabo-intern',
+      'Ollama als zentralen internen LLM-Dienst auf einem Contabo-VPS deployen: Docker Compose, Dokploy, persistente Modelle und ein dediziertes Netzwerk für andere Container – ohne öffentliche API.',
+      ollamaContent,
+      category.rows[0].id,
+      'Fortgeschritten',
+      30,
+    ]
+  );
+
+  if (!ollamaArticle.rows.length) {
+    ollamaArticle = await pool.query(
+      `SELECT id FROM articles WHERE slug = $1`,
+      ['ollama-docker-dokploy-contabo-intern']
+    );
+  }
+
+  const ollamaTags = [
+    ['Ollama', 'ollama'],
+    ['Docker', 'docker'],
+    ['Dokploy', 'dokploy'],
+    ['Contabo', 'contabo'],
+    ['LLM', 'llm'],
+    ['REST API', 'rest-api'],
+    ['Docker Networking', 'docker-networking']
+  ];
+
+  for (const tag of ollamaTags) {
+    const inserted = await pool.query(
+      `INSERT INTO tags (name, slug) VALUES ($1, $2)
+       ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name
+       RETURNING id`,
+      tag
+    );
+    await pool.query(
+      `INSERT INTO article_tags (article_id, tag_id)
+       VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+      [ollamaArticle.rows[0].id, inserted.rows[0].id]
     );
   }
 }

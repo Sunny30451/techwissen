@@ -1,5 +1,4 @@
 import Icon from './Icon.jsx';
-import { appUrl } from '../app-url.js';
 
 export default function ArticleCard({ article, featured = false }) {
   return (
@@ -18,7 +17,7 @@ export default function ArticleCard({ article, featured = false }) {
           <span><Icon name="clock" size={16} /> {article.reading_time_minutes} Min.</span>
           <span>{article.difficulty}</span>
         </div>
-        <a className="read-link" href={appUrl(`artikel/${article.slug}`)}>
+        <a className="read-link" href={`/artikel/${article.slug}`}>
           Lesen <Icon name="arrow" size={17} />
         </a>
       </div>

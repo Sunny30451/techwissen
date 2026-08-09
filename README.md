@@ -21,7 +21,9 @@ Eine dockerisierte Fullstack-Wissensbasis für praxisnahe Artikel rund um Softwa
 - PostgreSQL-18-Persistenz über Named Volume am aktuellen offiziellen Volume-Pfad `/var/lib/postgresql`
 - Healthchecks für Datenbank und Backend
 - API nicht direkt öffentlich; Nginx proxyt `/api` intern zum Backend
-- Seed-Artikel: „Universelle Docker-Entwicklungsumgebung auf Contabo mit Dokploy“
+- Quellversionierte Startartikel:
+  - „Universelle Docker-Entwicklungsumgebung auf Contabo mit Dokploy“
+  - „Ollama sicher mit Docker und Dokploy auf einem Contabo VPS bereitstellen“
 
 ## Projektstruktur
 
@@ -33,11 +35,20 @@ techwissen/
 ├── README.md
 ├── docs/
 │   └── CONCEPT.md
+├── examples/
+│   └── ollama-dokploy/
+│       ├── docker-compose.yml
+│       ├── .env.example
+│       ├── create-network.sh
+│       └── client-compose-snippet.yml
 ├── backend/
 │   ├── Dockerfile
 │   ├── package.json
 │   ├── content/
-│   │   └── dev-container-guide.md
+│   │   ├── dev-container-guide.md
+│   │   └── ollama-dokploy-contabo.md
+│   ├── scripts/
+│   │   └── import-ollama-article.js
 │   └── src/
 │       ├── db.js
 │       ├── migrate.js
@@ -105,24 +116,6 @@ docker compose -f docker-compose.yml -f docker-compose.local.yml down -v
 
 Das Produktions-Compose veröffentlicht absichtlich keinen Host-Port. Dokploy/Traefik routet intern direkt auf Port `80` des Frontend-Containers. Dadurch bleiben Backend (`3000`) und PostgreSQL (`5432`) ausschließlich im internen Docker-Netz.
 
-### Deployment unter einem URL-Pfad
-
-Wenn die Anwendung nicht auf der Domain-Wurzel, sondern beispielsweise unter `https://example.com/tech` erreichbar sein soll, muss in Dokploy gesetzt werden:
-
-```env
-APP_BASE_URL=/tech
-```
-
-Der Wert muss dem öffentlichen Pfad aus der Dokploy-Domainkonfiguration entsprechen. Für ein Deployment auf der Domain-Wurzel bleibt der Wert `/`. `APP_BASE_URL` wird sowohl beim Vite-Build als auch zur Laufzeit von Nginx verwendet; nach einer Änderung ist deshalb ein vollständiger Rebuild erforderlich, ein reiner Container-Neustart reicht nicht.
-
-Empfohlene Dokploy-Domainkonfiguration für das Beispiel:
-
-- **Path:** `/tech`
-- **Container Port:** `80`
-- **Strip Path:** aktiviert
-
-Nginx akzeptiert vorsorglich beide Varianten, sodass die Anwendung auch funktioniert, wenn Dokploy den Pfad nicht entfernt. Nach dem Deployment müssen `/tech/`, `/tech/assets/...`, `/tech/api/health` und ein Deep Link unter `/tech/artikel/...` erreichbar sein.
-
 ## API
 
 ### Healthcheck
@@ -150,11 +143,26 @@ GET /api/articles?featured=true
 
 ```http
 GET /api/articles/docker-entwicklungsumgebung-contabo-dokploy
+GET /api/articles/ollama-docker-dokploy-contabo-intern
 ```
 
-## Weitere Artikel ergänzen
+## Quellversionierte Artikel und Importskripte
 
-Aktuell wird der erste Artikel in `backend/src/migrate.js` aus `backend/content/dev-container-guide.md` eingelesen und beim ersten Start als Seed-Datensatz in PostgreSQL gespeichert. Bereits vorhandene Artikel werden bei späteren Starts nicht überschrieben.
+Die beiden vorhandenen Artikel liegen als Markdown unter `backend/content/` und werden bei einer neuen Datenbank durch `backend/src/migrate.js` als Seed-Datensätze angelegt. Bereits vorhandene Artikel werden beim normalen Backend-Start nicht überschrieben.
+
+Der Ollama-Artikel besitzt zusätzlich ein idempotentes Import-/Update-Skript. Damit kann der Artikel auf einer bereits laufenden TechWissen-Datenbank gezielt veröffentlicht oder auf die aktuelle Markdown-Version aktualisiert werden:
+
+```bash
+docker compose exec backend npm run import:ollama
+```
+
+In Dokploy kann derselbe Befehl über den Terminalzugriff des `backend`-Services ausgeführt werden:
+
+```bash
+npm run import:ollama
+```
+
+Das Skript führt ein Upsert anhand des Slugs `ollama-docker-dokploy-contabo-intern` durch und synchronisiert die Tags. Dadurch kann es mehrfach sicher ausgeführt werden.
 
 Für die nächste Ausbaustufe empfiehlt sich ein Adminbereich mit:
 

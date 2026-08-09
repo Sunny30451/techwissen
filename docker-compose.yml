@@ -42,11 +42,7 @@ services:
   frontend:
     build:
       context: ./frontend
-      args:
-        APP_BASE_URL: ${APP_BASE_URL:-/}
     restart: unless-stopped
-    environment:
-      APP_BASE_URL: ${APP_BASE_URL:-/}
     expose:
       - "80"
     depends_on:

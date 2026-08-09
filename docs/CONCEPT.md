@@ -4,7 +4,7 @@
 
 **TechWissen** ist eine deutschsprachige Wissensbasis für Software- und Servertechnologien. Der Schwerpunkt liegt nicht auf kurzen Copy-and-paste-Snippets, sondern auf nachvollziehbaren technischen Artikeln mit Architektur, Sicherheitsaspekten, Konfiguration und konkreten Beispielen.
 
-Der erste Artikel ist die Anleitung **„Universelle Docker-Entwicklungsumgebung auf Contabo mit Dokploy“**.
+Die Wissensbasis startet mit den Anleitungen **„Universelle Docker-Entwicklungsumgebung auf Contabo mit Dokploy“** und **„Ollama sicher mit Docker und Dokploy auf einem Contabo VPS bereitstellen“**.
 
 ## Zielgruppen
 
@@ -104,7 +104,7 @@ PostgreSQL verwaltet Kategorien, Artikel und Tags relational. Der Artikeltext li
 1. Inhalte bleiben unabhängig vom React-Build.
 2. Später kann ein Adminbereich Inhalte direkt bearbeiten, ohne das Frontend neu zu deployen.
 
-Der erste Artikel wird beim initialen Start aus einer Markdown-Datei geseedet. Ist der Artikel bereits vorhanden, wird er beim Neustart nicht überschrieben.
+Die quellversionierten Startartikel werden beim initialen Start aus Markdown-Dateien geseedet. Bereits vorhandene Artikel werden beim normalen Neustart nicht überschrieben. Für den Ollama-Artikel existiert zusätzlich ein idempotentes Importskript, das eine bereits laufende Datenbank gezielt aktualisieren kann.
 
 ## Sicherheitskonzept der ersten Version
 
