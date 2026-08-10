@@ -27,6 +27,9 @@ Eine dockerisierte Fullstack-Wissensbasis für praxisnahe Artikel rund um Softwa
 - Quellversionierte Startartikel:
   - „Universelle Docker-Entwicklungsumgebung auf Contabo mit Dokploy“
   - „Ollama sicher mit Docker und Dokploy auf einem Contabo VPS bereitstellen“
+- Quellversionierte Startartikel:
+  - „Universelle Docker-Entwicklungsumgebung auf Contabo mit Dokploy“
+  - „Ollama sicher mit Docker und Dokploy auf einem Contabo VPS bereitstellen“
 
 ## Projektstruktur
 
@@ -44,10 +47,20 @@ techwissen/
 │       ├── .env.example
 │       ├── create-network.sh
 │       └── client-compose-snippet.yml
+├── examples/
+│   └── ollama-dokploy/
+│       ├── docker-compose.yml
+│       ├── .env.example
+│       ├── create-network.sh
+│       └── client-compose-snippet.yml
 ├── backend/
 │   ├── Dockerfile
 │   ├── package.json
 │   ├── content/
+│   │   ├── dev-container-guide.md
+│   │   └── ollama-dokploy-contabo.md
+│   ├── scripts/
+│   │   └── import-ollama-article.js
 │   │   ├── dev-container-guide.md
 │   │   └── ollama-dokploy-contabo.md
 │   ├── scripts/
