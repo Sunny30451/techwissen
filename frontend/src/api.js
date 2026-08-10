@@ -1,5 +1,7 @@
+import { appUrl } from './app-url.js';
+
 async function request(path, options = {}) {
-  const response = await fetch(path, {
+  const response = await fetch(appUrl(path), {
     ...options,
     headers: {
       Accept: 'application/json',
