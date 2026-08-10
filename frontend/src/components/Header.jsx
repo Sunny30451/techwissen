@@ -24,6 +24,7 @@ export default function Header() {
           <a href={appUrl('#artikel')}>Artikel</a>
           <a href={appUrl('#kategorien')}>Kategorien</a>
           <a href={appUrl('#ueber')}>Über das Projekt</a>
+          <a href={appUrl('/admin')}>Admin</a>
         </nav>
       </div>
     </header>
