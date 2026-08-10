@@ -16,7 +16,9 @@ function normalizeBaseUrl(value = '/') {
   return path;
 }
 
+
 export default defineConfig({
+    base: normalizeBaseUrl(process.env.APP_BASE_URL),
   plugins: [react()],
   server: {
     port: 5173,
