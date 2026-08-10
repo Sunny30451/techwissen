@@ -1,0 +1,14 @@
+services:
+  backend:
+    image: ghcr.io/dein-user/dein-backend:latest
+    restart: unless-stopped
+    environment:
+      OLLAMA_BASE_URL: http://ollama:11434
+    networks:
+      - default
+      - ollama-internal
+
+networks:
+  ollama-internal:
+    external: true
+    name: ollama-internal

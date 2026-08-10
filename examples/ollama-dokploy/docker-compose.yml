@@ -1,0 +1,45 @@
+services:
+  ollama:
+    image: ollama/ollama:0.32.5
+    restart: unless-stopped
+
+    environment:
+      OLLAMA_HOST: 0.0.0.0:11434
+      OLLAMA_KEEP_ALIVE: ${OLLAMA_KEEP_ALIVE:-5m}
+      OLLAMA_CONTEXT_LENGTH: ${OLLAMA_CONTEXT_LENGTH:-4096}
+      OLLAMA_NUM_PARALLEL: ${OLLAMA_NUM_PARALLEL:-1}
+      OLLAMA_MAX_LOADED_MODELS: ${OLLAMA_MAX_LOADED_MODELS:-1}
+
+    expose:
+      - "11434"
+
+    volumes:
+      - ollama-data:/root/.ollama
+
+    networks:
+      ollama-internal:
+        aliases:
+          - ollama
+      ollama-egress:
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "OLLAMA_HOST=http://127.0.0.1:11434 ollama list >/dev/null 2>&1 || exit 1"
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+volumes:
+  ollama-data:
+
+networks:
+  ollama-internal:
+    external: true
+    name: ollama-internal
+
+  ollama-egress:
+    driver: bridge
