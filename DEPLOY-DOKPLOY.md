@@ -1,139 +1,86 @@
 # TechWissen – Dokploy Deployment mit `APP_BASE_URL`
 
-## 1. Einzige öffentliche URL-Variable
+## 1. Grundprinzip
 
-TechWissen verwendet für die öffentliche URL ausschließlich:
-
-```env
-APP_BASE_URL=https://DOMAIN/repositoryname
-```
+`APP_BASE_URL` ist bei TechWissen **kein vollständiger URL**, sondern ausschließlich der Anwendungspfad unter der in Dokploy konfigurierten Domain.
 
 Beispiel:
 
 ```env
-APP_BASE_URL=https://example.com/techwissen
+APP_BASE_URL=/tech
 ```
 
-`APP_BASE_URL` muss, wenn gesetzt, eine vollständige `http://`- oder `https://`-URL sein. Ein abschließender Slash ist optional und wird normalisiert.
-
-Aus dieser einen Variable werden beim Build automatisch abgeleitet:
-
-- öffentlicher App-Pfad für Vite,
-- Nginx-Prefix,
-- API-Basis,
-- Admin-URL,
-- Artikel-URLs.
-
-Es gibt keine separate Base-Path- oder Web-Base-URL-Variable mehr.
-
-## 2. Fallback ohne `APP_BASE_URL`
-
-Ist `APP_BASE_URL` in Dokploy nicht definiert oder leer, ermittelt TechWissen den Repository-Namen. Die Anwendung verwendet dann auf der in Dokploy konfigurierten Domain automatisch:
+Dokploy stellt dazu Domain und HTTPS bereit:
 
 ```text
-https://DOMAIN/<repositoryname>
+https://DOMAIN/tech
 ```
 
-Bei einem Repository mit dem Namen `techwissen` lautet der Fallback-Pfad daher:
+## 2. Environment in Dokploy
+
+Beispiel:
+
+```env
+APP_BASE_URL=/tech
+POSTGRES_DB=techwissen
+POSTGRES_USER=techwissen
+POSTGRES_PASSWORD=<secret>
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=<secret>
+ADMIN_SESSION_SECRET=<secret>
+ARTICLE_PACKAGE_MAX_MB=100
+ARTICLE_MARKDOWN_MAX_MB=2
+```
+
+Secrets ausschließlich im Dokploy-Environment/Secret-Management pflegen und nicht in Git speichern.
+
+## 3. Fallback ohne `APP_BASE_URL`
+
+Ist `APP_BASE_URL` leer oder nicht definiert, wird der Repository-Name als Pfad verwendet:
+
+```text
+/<repositoryname>
+```
+
+Für `techwissen`:
 
 ```text
 /techwissen
 ```
 
-Die Repository-Ermittlung verwendet zuerst das Git-Remote `origin`. Ist im Docker-Build keine Git-Metadaten verfügbar, wird der im Frontend-Paket hinterlegte Repository-Name als Fallback verwendet.
+Die Domain wird nicht aus dem Quellcode abgeleitet, sondern in Dokploy ausgewählt.
 
-## 3. Dokploy Compose Deployment
+## 4. Domain Mapping in Dokploy
 
-In Dokploy ein Compose-Projekt mit folgender Datei anlegen:
-
-```text
-./docker-compose.yml
-```
-
-Die Secrets und Datenbankvariablen im Environment-Bereich von Dokploy setzen. `APP_BASE_URL` kann gesetzt oder bewusst leer gelassen werden. Dokploy schreibt Compose-Environment-Werte in die Deployment-Umgebung; im Compose werden die benötigten Werte explizit referenziert.
-
-## 4. Domain konfigurieren
-
-### Mit gesetzter `APP_BASE_URL`
-
-Bei:
-
-```env
-APP_BASE_URL=https://example.com/custom-path
-```
-
-muss im Dokploy-Domains-Tab konfiguriert werden:
+Bei `APP_BASE_URL=/tech`:
 
 ```text
 Service:        frontend
-Domain:         example.com
-Path:           /custom-path
 Container Port: 80
-Strip Path:     OFF
-HTTPS:          ON
-```
-
-### Ohne `APP_BASE_URL`
-
-Für das Repository `techwissen`:
-
-```text
-Service:        frontend
 Domain:         DOMAIN
-Path:           /techwissen
-Container Port: 80
+Path:           /tech
 Strip Path:     OFF
 HTTPS:          ON
 ```
 
-Der Dokploy-Pfad muss immer dem Pfadanteil der aufgelösten öffentlichen Basis-URL entsprechen. Strip Path bleibt deaktiviert, da Nginx den Prefix selbst verarbeitet.
+Beim Fallback muss `Path` auf `/<repositoryname>` gesetzt werden.
+
+Nur `frontend:80` wird durch Dokploy/Traefik geroutet. `backend:3000` und PostgreSQL `5432` bleiben im privaten Compose-Netz und erhalten keine Host-Port-Freigabe.
 
 ## 5. Öffentliche Routen
 
-Aus `APP_BASE_URL` werden automatisch erzeugt:
+Bei `APP_BASE_URL=/tech` und Domain `example.com` entstehen:
 
 ```text
-APP_BASE_URL/
-APP_BASE_URL/admin
-APP_BASE_URL/artikel/<slug>
-APP_BASE_URL/api/health
-APP_BASE_URL/api/articles
-APP_BASE_URL/api/categories
+https://example.com/tech/
+https://example.com/tech/admin
+https://example.com/tech/artikel/<slug>
+https://example.com/tech/api/health
+https://example.com/tech/api/articles
 ```
 
-## 6. Netzwerk
+Intern kennt die Anwendung nur den Prefix `/tech`. Die Domain gehört zur Reverse-Proxy-Konfiguration.
 
-Nur `frontend:80` wird über Dokploy/Traefik geroutet. `backend:3000` und `db:5432` bleiben im internen Compose-Netz und besitzen keine Host-Port-Freigabe.
+## 6. Änderungen
 
-## 7. Adminbereich
-
-Der Adminbereich ist relativ zu `APP_BASE_URL` unter `/admin` erreichbar. Der Login verwendet `ADMIN_USERNAME` und `ADMIN_PASSWORD`. `ADMIN_SESSION_SECRET` muss dauerhaft gesetzt und bei Redeployments beibehalten werden.
-
-## 8. Änderungen an `APP_BASE_URL`
-
-Da Vite den öffentlichen Asset-Pfad beim Build einbettet, erfordert eine Änderung von `APP_BASE_URL` einen vollständigen Frontend-Rebuild/Redeploy. Der Nginx-Start prüft zusätzlich, ob Runtime-URL und Build-Pfad zusammenpassen, und bricht bei einer inkonsistenten Konfiguration mit einer verständlichen Fehlermeldung ab.
-
-
-## 9. Artikelpakete und Upload-Volume
-
-Der Backend-Service verwendet zusätzlich das Named Volume:
-
-```text
-article-packages
-```
-
-Es wird im Backend unter `/app/uploads` gemountet. Darin liegen die zu Artikeln hochgeladenen Dokploy-/ZIP-Pakete. Der Speicher ist **nicht öffentlich als Verzeichnis gemountet**; Downloads laufen ausschließlich über die artikelbezogene Backend-Route und den bestehenden Nginx-API-Proxy.
-
-Optionale Uploadlimits im Dokploy-Environment:
-
-```env
-ARTICLE_PACKAGE_MAX_MB=100
-ARTICLE_MARKDOWN_MAX_MB=2
-```
-
-Für ein vollständiges Backup der TechWissen-App müssen künftig mindestens gesichert werden:
-
-- PostgreSQL / `postgres-data`
-- Artikelpakete / `article-packages`
-
-Die öffentliche Netzwerkkonvention bleibt unverändert: Nur `frontend:80` wird über Dokploy/Traefik geroutet. Für den Dateiupload ist keine zusätzliche Domain und keine zusätzliche Portfreigabe erforderlich.
+Änderungen von `APP_BASE_URL` erfordern einen vollständigen Frontend-Rebuild/Redeploy. Der Frontend-Container vergleicht beim Start den Build-Pfad mit dem Runtime-Wert und beendet sich mit einer Fehlermeldung, falls beide voneinander abweichen.

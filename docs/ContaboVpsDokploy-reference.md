@@ -15,10 +15,10 @@ Nur der Frontend-Service wird über Dokploy öffentlich geroutet. Backend und Po
 Die einzige öffentliche URL-Konfiguration der TechWissen-Anwendung ist:
 
 ```env
-APP_BASE_URL=https://DOMAIN/repositoryname
+APP_BASE_URL=/repositoryname
 ```
 
-Der Pfadanteil von `APP_BASE_URL` wird automatisch von Vite und Nginx verwendet.
+Der Wert von `APP_BASE_URL` wird automatisch von Vite und Nginx verwendet.
 
 Wenn `APP_BASE_URL` fehlt, verwendet TechWissen als Fallback den Repository-Namen:
 
@@ -33,8 +33,8 @@ Die Domain wird in diesem Fall durch die Dokploy-Domain-Konfiguration bestimmt.
 ```text
 Service:        frontend
 Container Port: 80
-Domain:         Domain aus APP_BASE_URL bzw. gewünschte Domain
-Path:           Pfadanteil aus APP_BASE_URL bzw. /<repositoryname>
+Domain:         in Dokploy konfigurierte Domain
+Path:           APP_BASE_URL bzw. /<repositoryname>
 Strip Path:     OFF
 HTTPS:          ON
 ```

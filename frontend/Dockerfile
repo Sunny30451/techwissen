@@ -13,8 +13,7 @@ COPY . .
 WORKDIR /workspace/frontend
 RUN npm run build \
     && mkdir -p /tmp/techwissen \
-    && node scripts/app-base-url.mjs --path > /tmp/techwissen/app-base-path \
-    && node scripts/app-base-url.mjs --url > /tmp/techwissen/app-base-url
+    && node scripts/app-base-url.mjs --path > /tmp/techwissen/app-base-path
 
 FROM nginx:1.29-alpine
 ARG APP_BASE_URL
@@ -27,7 +26,6 @@ COPY frontend/nginx.conf /etc/techwissen/nginx.conf.template
 COPY frontend/docker-entrypoint.d/40-techwissen-app-base-url.sh /docker-entrypoint.d/40-techwissen-app-base-url.sh
 COPY --from=build /workspace/frontend/dist /usr/share/nginx/html
 COPY --from=build /tmp/techwissen/app-base-path /etc/techwissen/app-base-path
-COPY --from=build /tmp/techwissen/app-base-url /etc/techwissen/app-base-url
 
 RUN chmod +x /docker-entrypoint.d/40-techwissen-app-base-url.sh
 

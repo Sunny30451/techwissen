@@ -48,44 +48,50 @@ export function resolveRepositoryName() {
   return repositoryNameFromGitConfig(frontendDir) || repositoryNameFromPackage() || 'app';
 }
 
-function normalizePathname(pathname) {
-  const clean = `/${String(pathname || '').replace(/^\/+|\/+$/g, '')}`;
+function normalizePathname(value) {
+  const raw = String(value || '').trim();
+  const clean = `/${raw.replace(/^\/+|\/+$/g, '')}`.replace(/\/{2,}/g, '/');
   return clean === '/' ? '' : clean;
 }
 
+function validateConfiguredPath(value) {
+  const configured = String(value || '').trim();
+
+  if (/^https?:\/\//i.test(configured)) {
+    throw new Error('APP_BASE_URL erwartet nur den Anwendungspfad, z. B. /techwissen, keine vollständige Domain/URL.');
+  }
+
+  if (/[?#]/.test(configured)) {
+    throw new Error('APP_BASE_URL darf keine Query-Parameter oder URL-Fragmente enthalten. Verwende nur einen Pfad wie /techwissen.');
+  }
+
+  const normalized = normalizePathname(configured);
+  if (!normalized) {
+    throw new Error('APP_BASE_URL muss einen Unterpfad enthalten, z. B. /techwissen.');
+  }
+
+  const segments = normalized.split('/').filter(Boolean);
+  if (segments.some((segment) => segment === '.' || segment === '..')) {
+    throw new Error('APP_BASE_URL darf keine relativen Pfadsegmente wie . oder .. enthalten.');
+  }
+
+  return normalized;
+}
+
+/**
+ * APP_BASE_URL is intentionally a path-only setting, e.g. /techwissen.
+ * The public hostname and HTTPS termination are owned by Dokploy/Traefik.
+ */
 export function resolveAppBaseUrl() {
   const configured = String(process.env.APP_BASE_URL || '').trim();
-
   if (!configured) {
     return `/${resolveRepositoryName()}`;
   }
-
-  let parsed;
-  try {
-    parsed = new URL(configured);
-  } catch {
-    throw new Error('APP_BASE_URL muss eine vollständige http:// oder https:// URL sein, z. B. https://example.com/techwissen.');
-  }
-
-  if (!['http:', 'https:'].includes(parsed.protocol)) {
-    throw new Error('APP_BASE_URL unterstützt ausschließlich http:// oder https:// URLs.');
-  }
-
-  parsed.hash = '';
-  parsed.search = '';
-  const normalizedPath = normalizePathname(parsed.pathname);
-  if (!normalizedPath) {
-    throw new Error('APP_BASE_URL muss einen Anwendungspfad enthalten, z. B. https://example.com/techwissen.');
-  }
-  parsed.pathname = normalizedPath;
-
-  return parsed.toString().replace(/\/$/, '');
+  return validateConfiguredPath(configured);
 }
 
 export function resolveAppBasePath() {
-  const resolved = resolveAppBaseUrl();
-  if (resolved.startsWith('/')) return normalizePathname(resolved);
-  return normalizePathname(new URL(resolved).pathname);
+  return resolveAppBaseUrl();
 }
 
 if (process.argv.includes('--url')) {

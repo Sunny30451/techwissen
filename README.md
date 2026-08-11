@@ -123,7 +123,7 @@ docker compose -f docker-compose.yml -f docker-compose.local.yml down -v
 7. Im Tab **Domains** eine Domain anlegen und konfigurieren:
    - Service: `frontend`
    - Container-Port: `80`
-   - Path: exakt der Pfadanteil von `APP_BASE_URL` (oder `/<repositoryname>` beim Fallback)
+   - Path: exakt der Wert von `APP_BASE_URL` (oder `/<repositoryname>` beim Fallback)
    - Strip Path: **OFF**
 8. HTTPS/Let's Encrypt aktivieren und neu deployen.
 
@@ -290,87 +290,25 @@ Als nächste Ausbaustufe des vorhandenen Adminbereichs bieten sich Rollen/Rechte
 
 ## Betrieb mit `APP_BASE_URL`
 
-TechWissen verwendet für die öffentliche Adresse ausschließlich eine Konfigurationsvariable:
+`APP_BASE_URL` ist ausschließlich der Anwendungspfad unter der in Dokploy konfigurierten Domain.
 
 ```env
-APP_BASE_URL=https://DOMAIN/repositoryname
+APP_BASE_URL=/tech
 ```
 
-Beispiel:
+Die Domain wird **nicht** in `APP_BASE_URL` eingetragen. Beispiel: Bei Domain `example.com` und `APP_BASE_URL=/tech` ist TechWissen unter `https://example.com/tech/` erreichbar.
 
-```env
-APP_BASE_URL=https://example.com/techwissen
-```
+Wenn `APP_BASE_URL` leer oder nicht gesetzt ist, verwendet TechWissen automatisch `/<repositoryname>`. Für das Repository `techwissen` ist der Fallback `/techwissen`.
 
-Der Pfadanteil wird beim Build automatisch für Vite, Nginx, API-Aufrufe, Navigation, Admin- und Artikel-URLs verwendet. Im Quellcode existiert kein fest verdrahteter Deployment-Unterpfad.
-
-### Fallback auf Repository-Namen
-
-Wird `APP_BASE_URL` nicht gesetzt, verwendet die Anwendung automatisch den Repository-Namen als Pfad. Für das Repository `techwissen` ergibt sich auf der in Dokploy gewählten Domain:
-
-```text
-https://DOMAIN/techwissen
-```
-
-Der Repository-Name wird bevorzugt aus dem Git-Remote `origin` gelesen. Falls die Git-Metadaten im Build-Kontext nicht vorhanden sind, dient der im Frontend-Paket hinterlegte Repository-Name als Fallback.
-
-### Dokploy Domain-Konfiguration
-
-Bei:
-
-```env
-APP_BASE_URL=https://example.com/techwissen
-```
-
-konfigurierst du im Dokploy-Domains-Tab:
+Dokploy-Domain-Mapping:
 
 ```text
 Service:        frontend
-Domain:         example.com
-Path:           /techwissen
 Container Port: 80
+Domain:         gewünschte Domain
+Path:           APP_BASE_URL bzw. /<repositoryname>
 Strip Path:     OFF
 HTTPS:          ON
 ```
 
-Ohne `APP_BASE_URL` muss `Path` auf `/<repositoryname>` gesetzt werden. Dokploy/Traefik entfernt den Prefix nicht; Nginx verarbeitet denselben Prefix intern und leitet den API-Bereich an `backend:3000/api` weiter.
-
-### Öffentliche Routen
-
-Alle Routen werden relativ zu `APP_BASE_URL` erzeugt:
-
-```text
-APP_BASE_URL/
-APP_BASE_URL/admin
-APP_BASE_URL/artikel/<slug>
-APP_BASE_URL/api/...
-```
-
-### Environment-Variablen
-
-```env
-APP_BASE_URL=https://example.com/techwissen
-POSTGRES_DB=techwissen
-POSTGRES_USER=techwissen
-POSTGRES_PASSWORD=<langes-zufälliges-passwort>
-ADMIN_USERNAME=admin
-ADMIN_PASSWORD=<separates-langes-passwort>
-ADMIN_SESSION_SECRET=<langes-zufälliges-secret>
-```
-
-`APP_BASE_URL` darf leer bleiben, wenn der Repository-Fallback verwendet werden soll. Eine Änderung der URL erfordert einen Frontend-Rebuild/Redeploy, weil Vite den öffentlichen Asset-Pfad in das Build-Ergebnis einbettet.
-
-### Enthaltene quellversionierte Artikel
-
-Beim ersten Start werden die aktuellen Artikel automatisch angelegt:
-
-1. Universelle Docker-Entwicklungsumgebung auf Contabo mit Dokploy
-2. Ollama sicher mit Docker und Dokploy auf einem Contabo VPS bereitstellen
-3. n8n mit Docker und Dokploy auf einem Contabo VPS bereitstellen
-
-Die separaten Imports für Ollama und n8n bleiben zusätzlich verfügbar:
-
-```bash
-npm run import:ollama
-npm run import:n8n
-```
+Alle App-Routen werden relativ zu diesem Prefix erzeugt: `/admin`, `/artikel/<slug>` und `/api/...`. Eine Änderung von `APP_BASE_URL` erfordert einen vollständigen Frontend-Rebuild/Redeploy, da Vite den Base-Pfad in die Build-Artefakte einbettet.

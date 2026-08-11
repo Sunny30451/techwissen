@@ -1,47 +1,49 @@
-# Migration auf APP_BASE_URL
+# APP_BASE_URL – Pfadkonvention
 
-TechWissen verwendet ab diesem Stand ausschließlich `APP_BASE_URL` für die öffentliche Anwendungsadresse.
+TechWissen verwendet ausschließlich `APP_BASE_URL` als konfigurierbaren öffentlichen Anwendungspfad.
 
-## Vorher
+## Format
 
-Frühere Stände verwendeten getrennte Variablen für den Unterpfad bzw. die externe Basis-URL.
-Diese Variablen werden nicht mehr ausgewertet.
-
-## Jetzt
+`APP_BASE_URL` enthält **nur den Pfad**, niemals Domain oder Protokoll:
 
 ```env
-APP_BASE_URL=https://example.com/techwissen
+APP_BASE_URL=/tech
 ```
 
-Der Pfad `/techwissen` wird daraus automatisch für Vite und Nginx abgeleitet.
+Weitere gültige Beispiele:
 
-## Ohne APP_BASE_URL
+```env
+APP_BASE_URL=/techwissen
+APP_BASE_URL=/apps/techwissen
+```
 
-Wenn `APP_BASE_URL` leer oder nicht definiert ist, wird der Repository-Name verwendet:
+Die Domain und HTTPS-Terminierung werden ausschließlich in Dokploy/Traefik konfiguriert.
+
+## Fallback
+
+Wenn `APP_BASE_URL` leer oder nicht definiert ist, ermittelt der Frontend-Build den Repository-Namen und verwendet:
 
 ```text
-https://DOMAIN/<repositoryname>
+/<repositoryname>
 ```
 
-Die Domain wird in diesem Fall ausschließlich im Dokploy-Domains-Tab festgelegt.
+Für das Repository `techwissen` ist der Fallback damit `/techwissen`.
 
 ## Dokploy
 
-Bei einer gesetzten URL wie:
-
-```env
-APP_BASE_URL=https://example.com/techwissen
-```
-
-muss die Domain-Konfiguration lauten:
+Bei `APP_BASE_URL=/tech`:
 
 ```text
 Service: frontend
-Domain: example.com
-Path: /techwissen
 Container Port: 80
+Domain: DOMAIN
+Path: /tech
 Strip Path: OFF
 HTTPS: ON
 ```
 
-Nach einer Änderung von `APP_BASE_URL` ist ein Rebuild/Redeploy erforderlich.
+Bei leerer `APP_BASE_URL` wird in Dokploy `/<repositoryname>` als Path gesetzt.
+
+## Rebuild
+
+Vite bettet den Pfad beim Build in die Asset-URLs ein. Jede Änderung von `APP_BASE_URL` erfordert daher einen vollständigen Frontend-Rebuild/Redeploy. Der Nginx-Entrypoint prüft zusätzlich, ob der Runtime-Pfad mit dem Build-Pfad übereinstimmt.

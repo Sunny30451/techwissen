@@ -1,42 +1,24 @@
-# TechWissen – aktueller Source-Stand
+# TechWissen – Source-Stand
 
-## Deployment-Konvention
+## Öffentlicher Anwendungspfad
 
-Die Anwendung verwendet für ihre öffentliche Adresse ausschließlich `APP_BASE_URL`.
+TechWissen verwendet ausschließlich `APP_BASE_URL` als konfigurierbaren Pfad:
 
 ```env
-APP_BASE_URL=https://DOMAIN/repositoryname
+APP_BASE_URL=/pfad
 ```
 
-Wenn `APP_BASE_URL` fehlt, wird `/<repositoryname>` als öffentlicher Pfad verwendet. Die Domain stammt dann aus der Dokploy-Domain-Konfiguration.
+Die Domain wird ausschließlich in Dokploy konfiguriert. Bei fehlender bzw. leerer `APP_BASE_URL` wird `/<repositoryname>` verwendet.
 
 Dokploy:
 
 ```text
 Service: frontend
 Container Port: 80
-Path: Pfadanteil von APP_BASE_URL oder /<repositoryname>
+Domain: gewünschte Domain
+Path: APP_BASE_URL oder /<repositoryname>
 Strip Path: OFF
 HTTPS: ON
 ```
 
-Backend und PostgreSQL bleiben ausschließlich im internen Compose-Netz.
-
-## Enthalten
-
-- React/Vite-Frontend mit Nginx
-- Node.js/Express-Backend
-- PostgreSQL
-- Adminbereich für Artikel und Kategorien
-- Markdown-Rendering und Vorschau
-- Artikelimporte für Entwicklungscontainer, Ollama und n8n
-- Docker-/Dokploy-Beispiele
-
-## Artikelressourcen / Uploads
-
-- `articles.repository_url` für optionale Repository-Verknüpfungen
-- persistentes Named Volume `article-packages` für Dokploy-ZIP-Archive
-- ZIP-Upload/-Austausch/-Löschung im Adminbereich
-- öffentliche Paketdownloads je Artikel mit SHA-256-Metadaten
-- validierter `.md`-Import für neue Artikel gemäß TechWissen-Struktur
-- Uploadlimits über `ARTICLE_PACKAGE_MAX_MB` und `ARTICLE_MARKDOWN_MAX_MB`
+Backend `3000` und PostgreSQL `5432` bleiben intern. Artikel-ZIP-Dateien liegen im persistenten Named Volume `article-packages` und werden über die bestehende API-Route ausgeliefert.
