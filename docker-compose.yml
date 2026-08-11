@@ -46,10 +46,10 @@ services:
     build:
       context: ./frontend
       args:
-        APP_BASE_PATH: ${APP_BASE_PATH:-/tech}
+        APP_BASE_PATH: ${APP_BASE_PATH:-/tech-prod}
     restart: unless-stopped
     environment:
-      APP_BASE_PATH: ${APP_BASE_PATH:-/tech}
+      APP_BASE_PATH: ${APP_BASE_PATH:-/tech-prod}
     expose:
       - "80"
     depends_on:

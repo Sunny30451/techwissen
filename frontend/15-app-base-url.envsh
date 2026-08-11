@@ -14,7 +14,7 @@ esac
 
 if [ "$(printf '%s' "$app_base_path" | wc -l)" -ne 0 ] || \
    ! printf '%s\n' "$app_base_path" | grep -Eq '^(/[A-Za-z0-9._~%-]+)*$'; then
-  echo >&2 'APP_BASE_URL must be a URL path such as "/" or "/tech-test".'
+  echo >&2 'APP_BASE_URL must be a URL path such as "/" or "/tech-prod".'
   return 1
 fi
 
