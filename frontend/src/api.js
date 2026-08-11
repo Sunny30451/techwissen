@@ -1,7 +1,7 @@
 import { APP_BASE_PATH } from './config.js';
 
 async function request(path, options = {}) {
-  const response = await fetch(path, {
+  const response = await fetch(`${APP_BASE_PATH}`/path, {
     ...options,
     headers: {
       Accept: 'application/json',
