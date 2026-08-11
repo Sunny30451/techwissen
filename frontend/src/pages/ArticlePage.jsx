@@ -1,3 +1,4 @@
+import { appUrl } from '../config.js';
 import { useEffect, useMemo, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -5,7 +6,6 @@ import { getArticle } from '../api.js';
 import CodeBlock from '../components/CodeBlock.jsx';
 import Icon from '../components/Icon.jsx';
 import Loading from '../components/Loading.jsx';
-import { appUrl } from '../app-url.js';
 
 function slugify(value) {
   return value
@@ -61,7 +61,7 @@ export default function ArticlePage({ slug }) {
         <span>404</span>
         <h1>Artikel nicht gefunden</h1>
         <p>Der gewünschte Artikel existiert nicht oder ist nicht mehr verfügbar.</p>
-        <a className="button-primary" href={appUrl()}>Zur Startseite</a>
+        <a className="button-primary" href={appUrl("/")}>Zur Startseite</a>
       </main>
     );
   }
@@ -83,9 +83,8 @@ export default function ArticlePage({ slug }) {
       return <code className="inline-code">{children}</code>;
     },
     a: ({ href, children }) => {
-      const external = /^https?:\/\//i.test(href ?? '');
-      const targetHref = href?.startsWith('/') ? appUrl(href) : href;
-      return <a href={targetHref} target={external ? '_blank' : undefined} rel={external ? 'noreferrer' : undefined}>{children}</a>;
+      const resolvedHref = href?.startsWith('/') ? appUrl(href) : href;
+      return <a href={resolvedHref} target={href?.startsWith('http') ? '_blank' : undefined} rel="noreferrer">{children}</a>;
     },
   };
 
@@ -93,7 +92,7 @@ export default function ArticlePage({ slug }) {
     <main className="article-page">
       <div className="article-hero">
         <div className="container article-hero-inner">
-          <a href={appUrl()} className="breadcrumb">TechWissen <span>/</span> {article.category_name}</a>
+          <a href={appUrl("/")} className="breadcrumb">TechWissen <span>/</span> {article.category_name}</a>
           <span className="category-pill">{article.category_name}</span>
           <h1>{article.title}</h1>
           <p>{article.excerpt}</p>
@@ -114,7 +113,7 @@ export default function ArticlePage({ slug }) {
           <nav>
             {toc.map((item) => <a key={item.id} href={`#${item.id}`}>{item.title}</a>)}
           </nav>
-          <a className="toc-home" href={appUrl()}>← Alle Artikel</a>
+          <a className="toc-home" href={appUrl("/")}>← Alle Artikel</a>
         </aside>
 
         <article className="markdown-body">

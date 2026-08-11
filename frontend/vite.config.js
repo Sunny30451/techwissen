@@ -1,29 +1,19 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-function normalizeBaseUrl(value = '/') {
-  const raw = String(value);
-
-  if (!raw || raw === '/') return '/';
-
-  const withLeadingSlash = raw.startsWith('/') ? raw : `/${raw}`;
-  const path = withLeadingSlash.endsWith('/') ? withLeadingSlash : `${withLeadingSlash}/`;
-
-  if (!/^(?:\/[A-Za-z0-9._~%-]+)+\/$/.test(path)) {
-    throw new Error('APP_BASE_URL must be a URL path such as "/" or "/tech-test".');
-  }
-
-  return path;
-}
-
+const rawBasePath = process.env.APP_BASE_PATH || '/tech';
+const normalizedBasePath = `/${rawBasePath.replace(/^\/+|\/+$/g, '')}/`;
 
 export default defineConfig({
-    base: normalizeBaseUrl(process.env.APP_BASE_URL),
+  base: normalizedBasePath,
   plugins: [react()],
   server: {
     port: 5173,
     proxy: {
-      '/api': 'http://localhost:3000',
+      [`${normalizedBasePath.replace(/\/$/, '')}/api`]: {
+        target: 'http://localhost:3000',
+        rewrite: (path) => path.replace(`${normalizedBasePath.replace(/\/$/, '')}/api`, '/api'),
+      },
     },
   },
 });

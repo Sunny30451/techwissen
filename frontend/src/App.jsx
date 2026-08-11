@@ -3,10 +3,11 @@ import Footer from './components/Footer.jsx';
 import HomePage from './pages/HomePage.jsx';
 import ArticlePage from './pages/ArticlePage.jsx';
 import AdminPage from './pages/AdminPage.jsx';
-import { appRelativePath } from './app-url.js';
+import { stripAppBasePath } from './config.js';
 
 export default function App() {
-  const path = appRelativePath();
+  const relativePath = stripAppBasePath(window.location.pathname);
+  const path = relativePath.replace(/\/+$/, '') || '/';
   const articleMatch = path.match(/^\/artikel\/([^/]+)$/);
 
   if (path === '/admin') return <AdminPage />;

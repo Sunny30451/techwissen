@@ -4,7 +4,7 @@
 
 **TechWissen** ist eine deutschsprachige Wissensbasis für Software- und Servertechnologien. Der Schwerpunkt liegt nicht auf kurzen Copy-and-paste-Snippets, sondern auf nachvollziehbaren technischen Artikeln mit Architektur, Sicherheitsaspekten, Konfiguration und konkreten Beispielen.
 
-Die Wissensbasis startet mit den Anleitungen **„Universelle Docker-Entwicklungsumgebung auf Contabo mit Dokploy“** und **„Ollama sicher mit Docker und Dokploy auf einem Contabo VPS bereitstellen“**.
+Der erste Artikel ist die Anleitung **„Universelle Docker-Entwicklungsumgebung auf Contabo mit Dokploy“**.
 
 ## Zielgruppen
 
@@ -86,7 +86,7 @@ Nur das Frontend ist über Traefik erreichbar. Backend und Datenbank befinden si
 
 ## Backend-API
 
-Die öffentliche API bleibt read-only:
+Die erste Version ist bewusst read-only:
 
 - `GET /api/health`
 - `GET /api/categories`
@@ -95,16 +95,16 @@ Die öffentliche API bleibt read-only:
 - `GET /api/articles?category=...`
 - `GET /api/articles/:slug`
 
-Zusätzlich existiert ein geschützter Redaktionsbereich unter `/admin`. Schreibzugriffe laufen ausschließlich über `/api/admin/*` und erfordern nach dem Login ein zeitlich begrenztes HMAC-signiertes Bearer-Token. Der Adminbereich stellt CRUD-Endpunkte für Artikel und Kategorien bereit.
+Dadurch existiert zunächst keine ungeschützte Schreibschnittstelle.
 
 ## Datenhaltung
 
 PostgreSQL verwaltet Kategorien, Artikel und Tags relational. Der Artikeltext liegt als Markdown in der Datenbank. Das bietet zwei Vorteile:
 
 1. Inhalte bleiben unabhängig vom React-Build.
-2. Der vorhandene Adminbereich kann Inhalte direkt bearbeiten, ohne das Frontend neu zu deployen.
+2. Später kann ein Adminbereich Inhalte direkt bearbeiten, ohne das Frontend neu zu deployen.
 
-Die quellversionierten Startartikel werden beim initialen Start aus Markdown-Dateien geseedet. Bereits vorhandene Artikel werden beim normalen Neustart nicht überschrieben. Für den Ollama-Artikel existiert zusätzlich ein idempotentes Importskript, das eine bereits laufende Datenbank gezielt aktualisieren kann.
+Der erste Artikel wird beim initialen Start aus einer Markdown-Datei geseedet. Ist der Artikel bereits vorhanden, wird er beim Neustart nicht überschrieben.
 
 ## Sicherheitskonzept der ersten Version
 
@@ -113,9 +113,6 @@ Die quellversionierten Startartikel werden beim initialen Start aus Markdown-Dat
 - Nginx proxyt `/api` intern zum Backend.
 - Produktiv wird der Frontend-Port über Dokploy/Traefik geroutet.
 - Datenbankpasswort ist eine erforderliche Environment Variable.
-- Admin-Benutzername, Admin-Passwort und Session-Secret werden ausschließlich über Environment Variablen bereitgestellt.
-- Admin-Tokens sind HMAC-signiert und laufen nach 12 Stunden ab.
-- Fehlgeschlagene Admin-Logins werden pro IP begrenzt.
 - React-Markdown rendert kein ungeprüftes Raw HTML.
 - Nginx setzt grundlegende Security Header und eine restriktive Content Security Policy.
 - Express setzt zusätzliche Security Header über Helmet.
@@ -124,22 +121,13 @@ Die quellversionierten Startartikel werden beim initialen Start aus Markdown-Dat
 
 ### Phase 2 – Redaktion
 
-Bereits umgesetzt:
-
 - Administrator-Login
-- Artikel erstellen, bearbeiten und löschen
-- Kategorien erstellen, bearbeiten und löschen
-- Markdown-Editor mit Vorschau
-- Tags, Lesezeit, Schwierigkeitsgrad und Featured-Status
-
-Noch vorgesehen:
-
 - Rollen und Berechtigungen
+- Markdown-Editor mit Live-Vorschau
 - Draft/Published-Workflow
-- Artikelarchiv statt Hard Delete
+- Artikel erstellen, ändern und archivieren
 - SEO-Titel und Meta-Description
 - Titelbilder und Assets
-- Versionshistorie
 
 ### Phase 3 – Wissensnavigation
 
@@ -182,3 +170,7 @@ Das Interface verwendet eine dunkle, sachliche Entwickler-Ästhetik mit:
 - Fokus auf langen, gut lesbaren Fachartikeln
 
 Die Gestaltung soll wie eine technische Dokumentationsplattform wirken, nicht wie ein Marketing-Blog.
+
+## Base-Path Deployment
+
+Die Anwendung unterstützt einen konfigurierbaren `APP_BASE_PATH`. Vite erzeugt Assets relativ zu diesem öffentlichen Basispfad, das Frontend rebasiert Navigation und API-Aufrufe darauf, und Nginx routet `${APP_BASE_PATH}/api/*` intern zum Backend. In Dokploy muss derselbe Pfad als Domain-Path ohne Strip-Path konfiguriert werden.

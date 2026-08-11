@@ -30,7 +30,7 @@ services:
       NODE_ENV: production
       ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:?ADMIN_PASSWORD must be set}
-      ADMIN_SESSION_SECRET: ${ADMIN_SESSION_SECRET:-}
+      ADMIN_SESSION_SECRET: ${ADMIN_SESSION_SECRET:?ADMIN_SESSION_SECRET must be set}
     depends_on:
       db:
         condition: service_healthy
@@ -45,11 +45,11 @@ services:
   frontend:
     build:
       context: ./frontend
-      args: 
-        APP_BASE_URL: ${APP_BASE_URL:-/}
+      args:
+        APP_BASE_PATH: ${APP_BASE_PATH:-/tech}
     restart: unless-stopped
     environment:
-      APP_BASE_URL: ${APP_BASE_URL:-/}
+      APP_BASE_PATH: ${APP_BASE_PATH:-/tech}
     expose:
       - "80"
     depends_on:
@@ -58,7 +58,7 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/ || exit 1"]
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/healthz || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 5

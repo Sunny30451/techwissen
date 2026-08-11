@@ -27,6 +27,7 @@ Eine dockerisierte Fullstack-Wissensbasis für praxisnahe Artikel rund um Softwa
 - Quellversionierte Startartikel:
   - „Universelle Docker-Entwicklungsumgebung auf Contabo mit Dokploy“
   - „Ollama sicher mit Docker und Dokploy auf einem Contabo VPS bereitstellen“
+  - „n8n mit Docker und Dokploy auf einem Contabo VPS bereitstellen“
 
 ## Projektstruktur
 
@@ -212,7 +213,7 @@ DELETE /api/admin/articles/:id
 
 ## Quellversionierte Artikel und Importskripte
 
-Die beiden vorhandenen Artikel liegen als Markdown unter `backend/content/` und werden bei einer neuen Datenbank durch `backend/src/migrate.js` als Seed-Datensätze angelegt. Bereits vorhandene Artikel werden beim normalen Backend-Start nicht überschrieben.
+Die quellversionierten Artikel liegen als Markdown unter `backend/content/` und werden bei einer neuen Datenbank durch `backend/src/migrate.js` als Seed-Datensätze angelegt. Bereits vorhandene Artikel werden beim normalen Backend-Start nicht überschrieben.
 
 Der Ollama-Artikel besitzt zusätzlich ein idempotentes Import-/Update-Skript. Damit kann der Artikel auf einer bereits laufenden TechWissen-Datenbank gezielt veröffentlicht oder auf die aktuelle Markdown-Version aktualisiert werden:
 
@@ -228,6 +229,20 @@ npm run import:ollama
 
 Das Skript führt ein Upsert anhand des Slugs `ollama-docker-dokploy-contabo-intern` durch und synchronisiert die Tags. Dadurch kann es mehrfach sicher ausgeführt werden.
 
+Der n8n-Artikel besitzt ebenfalls ein idempotentes Import-/Update-Skript. Es legt bei Bedarf zusätzlich die Kategorie `Automation & AI` an und synchronisiert die Artikel-Tags:
+
+```bash
+docker compose exec backend npm run import:n8n
+```
+
+Im Dokploy-Terminal des Backend-Services:
+
+```bash
+npm run import:n8n
+```
+
+Der verwendete Artikel-Slug lautet `n8n-docker-dokploy-contabo-ollama-llm`.
+
 Als nächste Ausbaustufe des vorhandenen Adminbereichs bieten sich Rollen/Rechte, Draft-/Published-Status, SEO-Metadaten, Artikelbilder und eine Versionshistorie an. Das bestehende Datenmodell kann dafür schrittweise erweitert werden.
 
 ## Sicherheitsnotizen
@@ -239,3 +254,88 @@ Als nächste Ausbaustufe des vorhandenen Adminbereichs bieten sich Rollen/Rechte
 - Der Adminbereich verwendet Bearer-Tokens statt Cookies. Admin-Passwort und Session-Secret gehören ausschließlich in Dokploy-Secrets/Environment-Variablen und niemals ins Repository.
 - `/admin` produktiv ausschließlich über HTTPS verwenden.
 - Der einfache In-Memory-Login-Rate-Limiter ist für eine einzelne Backend-Instanz ausgelegt; bei horizontaler Skalierung sollte er durch Redis oder einen vorgelagerten Rate Limiter ersetzt werden.
+
+---
+
+## Betrieb unter `DOMAIN/app-base-path`
+
+TechWissen ist für den Betrieb unter einem konfigurierbaren URL-Unterpfad vorbereitet.
+Der Pfad wird zentral über `APP_BASE_PATH` festgelegt.
+
+Beispiel für die aktuelle Instanz:
+
+```env
+APP_BASE_PATH=/tech
+```
+
+Damit lautet die öffentliche URL beispielsweise:
+
+```text
+https://vmd200786.contaboserver.net/tech/
+```
+
+Alternativ kann jeder andere Unterpfad verwendet werden, z. B.:
+
+```env
+APP_BASE_PATH=/app-base-path
+```
+
+und damit:
+
+```text
+https://example.com/app-base-path/
+```
+
+### Dokploy Domain-Konfiguration
+
+Im Dokploy-Domains-Tab für den Service `frontend`:
+
+```text
+Domain:         example.com
+Path:           /app-base-path
+Container Port: 80
+Strip Path:     deaktiviert / false
+HTTPS:          aktiviert
+```
+
+`Path` und `APP_BASE_PATH` müssen exakt übereinstimmen. Der Unterpfad wird **nicht** von Traefik entfernt; Nginx übernimmt das interne Routing für Frontend und API.
+
+### Erforderliche Environment-Variablen
+
+```env
+APP_BASE_PATH=/app-base-path
+POSTGRES_DB=techwissen
+POSTGRES_USER=techwissen
+POSTGRES_PASSWORD=<langes-zufälliges-passwort>
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=<separates-langes-passwort>
+ADMIN_SESSION_SECRET=<langes-zufälliges-secret>
+```
+
+### Öffentliche Pfade
+
+Bei `APP_BASE_PATH=/app-base-path`:
+
+```text
+Startseite: https://example.com/app-base-path/
+Admin:      https://example.com/app-base-path/admin
+Artikel:    https://example.com/app-base-path/artikel/<slug>
+API:        https://example.com/app-base-path/api/...
+```
+
+PostgreSQL und das Node.js-Backend veröffentlichen weiterhin keine eigenen Host-Ports.
+
+### Enthaltene quellversionierte Artikel
+
+Beim ersten Start werden alle aktuell mitgelieferten Artikel automatisch angelegt:
+
+1. Universelle Docker-Entwicklungsumgebung auf Contabo mit Dokploy
+2. Ollama sicher mit Docker und Dokploy auf einem Contabo VPS bereitstellen
+3. n8n mit Docker und Dokploy auf einem Contabo VPS bereitstellen
+
+Die separaten Imports für Ollama und n8n bleiben zusätzlich verfügbar:
+
+```bash
+npm run import:ollama
+npm run import:n8n
+```

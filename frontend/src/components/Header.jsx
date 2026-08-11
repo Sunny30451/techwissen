@@ -1,6 +1,6 @@
+import { appUrl } from '../config.js';
 import { useState } from 'react';
 import Icon from './Icon.jsx';
-import { appUrl } from '../app-url.js';
 
 export default function Header() {
   const [open, setOpen] = useState(false);
@@ -8,7 +8,7 @@ export default function Header() {
   return (
     <header className="site-header">
       <div className="container header-inner">
-        <a className="brand" href={appUrl()} aria-label="TechWissen Startseite">
+        <a className="brand" href={appUrl("/")} aria-label="TechWissen Startseite">
           <span className="brand-mark">TW</span>
           <span>
             <strong>TechWissen</strong>
@@ -21,10 +21,10 @@ export default function Header() {
         </button>
 
         <nav className={open ? 'main-nav is-open' : 'main-nav'}>
-          <a href={appUrl('#artikel')}>Artikel</a>
-          <a href={appUrl('#kategorien')}>Kategorien</a>
-          <a href={appUrl('#ueber')}>Über das Projekt</a>
-          <a href={appUrl('/admin')}>Admin</a>
+          <a href={appUrl("/#artikel")}>Artikel</a>
+          <a href={appUrl("/#kategorien")}>Kategorien</a>
+          <a href={appUrl("/#ueber")}>Über das Projekt</a>
+          <a href={appUrl("/admin")}>Admin</a>
         </nav>
       </div>
     </header>

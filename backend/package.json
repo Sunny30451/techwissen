@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "import:ollama": "node scripts/import-ollama-article.js"
+    "import:ollama": "node scripts/import-ollama-article.js",
+    "import:n8n": "node scripts/import-n8n-article.js"
   },
   "dependencies": {
     "express": "5.2.1",

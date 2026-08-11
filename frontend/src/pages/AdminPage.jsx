@@ -1,3 +1,4 @@
+import { appUrl } from '../config.js';
 import { useEffect, useMemo, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -73,7 +74,7 @@ function Login({ onLogin }) {
   return (
     <main className="admin-login-page">
       <section className="admin-login-card">
-        <a href="/" className="admin-back-link">← Zur Wissensbasis</a>
+        <a href={appUrl("/")} className="admin-back-link">← Zur Wissensbasis</a>
         <span className="section-kicker">TECHWISSEN ADMIN</span>
         <h1>Redaktion anmelden</h1>
         <p>Artikel und Kategorien verwalten. Die Anmeldung wird serverseitig geprüft.</p>
@@ -348,7 +349,7 @@ function ArticlesAdmin({ token, categories }) {
                 <td><strong>{article.title}</strong><small>/{article.slug}</small>{article.featured && <span className="admin-featured">Featured</span>}</td>
                 <td>{article.category_name}</td>
                 <td>{new Date(article.updated_at).toLocaleDateString('de-DE')}</td>
-                <td><div className="admin-row-actions"><button onClick={() => editArticle(article.id)}>Bearbeiten</button><a href={`/artikel/${article.slug}`} target="_blank" rel="noreferrer">Ansehen</a><button className="danger" onClick={() => remove(article)}>Löschen</button></div></td>
+                <td><div className="admin-row-actions"><button onClick={() => editArticle(article.id)}>Bearbeiten</button><a href={appUrl(`/artikel/${article.slug}`)} target="_blank" rel="noreferrer">Ansehen</a><button className="danger" onClick={() => remove(article)}>Löschen</button></div></td>
               </tr>
             ))}
           </tbody>
@@ -404,7 +405,7 @@ export default function AdminPage() {
       <div className="container admin-shell">
         <header className="admin-topbar">
           <div>
-            <a className="admin-back-link" href="/">← TechWissen öffnen</a>
+            <a className="admin-back-link" href={appUrl("/")}>← TechWissen öffnen</a>
             <h1>Redaktion</h1>
             <p>Artikel und Kategorien der Wissensbasis verwalten.</p>
           </div>
