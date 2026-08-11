@@ -28,6 +28,14 @@ services:
       PGUSER: ${POSTGRES_USER:-techwissen}
       PGPASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
       NODE_ENV: production
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?ADMIN_PASSWORD must be set}
+      ADMIN_SESSION_SECRET: ${ADMIN_SESSION_SECRET:?ADMIN_SESSION_SECRET must be set}
+      ARTICLE_UPLOAD_DIR: /app/uploads/article-packages
+      ARTICLE_PACKAGE_MAX_MB: ${ARTICLE_PACKAGE_MAX_MB:-100}
+      ARTICLE_MARKDOWN_MAX_MB: ${ARTICLE_MARKDOWN_MAX_MB:-2}
+    volumes:
+      - article-packages:/app/uploads
     depends_on:
       db:
         condition: service_healthy
@@ -41,12 +49,13 @@ services:
 
   frontend:
     build:
-      context: ./frontend
+      context: .
+      dockerfile: frontend/Dockerfile
       args:
-        APP_BASE_URL: ${APP_BASE_URL:-/}
+        APP_BASE_URL: ${APP_BASE_URL:-}
     restart: unless-stopped
     environment:
-      APP_BASE_URL: ${APP_BASE_URL:-/}
+      APP_BASE_URL: ${APP_BASE_URL:-}
     expose:
       - "80"
     depends_on:
@@ -55,13 +64,14 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/ || exit 1"]
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/healthz || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 5
 
 volumes:
   postgres-data:
+  article-packages:
 
 networks:
   app-network:

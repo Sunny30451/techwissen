@@ -6,11 +6,13 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "import:ollama": "node scripts/import-ollama-article.js"
+    "import:ollama": "node scripts/import-ollama-article.js",
+    "import:n8n": "node scripts/import-n8n-article.js"
   },
   "dependencies": {
     "express": "5.2.1",
     "helmet": "8.3.0",
-    "pg": "8.22.0"
+    "pg": "8.22.0",
+    "multer": "2.2.0"
   }
 }

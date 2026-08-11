@@ -4,7 +4,7 @@
 
 **TechWissen** ist eine deutschsprachige Wissensbasis für Software- und Servertechnologien. Der Schwerpunkt liegt nicht auf kurzen Copy-and-paste-Snippets, sondern auf nachvollziehbaren technischen Artikeln mit Architektur, Sicherheitsaspekten, Konfiguration und konkreten Beispielen.
 
-Die Wissensbasis startet mit den Anleitungen **„Universelle Docker-Entwicklungsumgebung auf Contabo mit Dokploy“** und **„Ollama sicher mit Docker und Dokploy auf einem Contabo VPS bereitstellen“**.
+Der erste Artikel ist die Anleitung **„Universelle Docker-Entwicklungsumgebung auf Contabo mit Dokploy“**.
 
 ## Zielgruppen
 
@@ -104,7 +104,7 @@ PostgreSQL verwaltet Kategorien, Artikel und Tags relational. Der Artikeltext li
 1. Inhalte bleiben unabhängig vom React-Build.
 2. Später kann ein Adminbereich Inhalte direkt bearbeiten, ohne das Frontend neu zu deployen.
 
-Die quellversionierten Startartikel werden beim initialen Start aus Markdown-Dateien geseedet. Bereits vorhandene Artikel werden beim normalen Neustart nicht überschrieben. Für den Ollama-Artikel existiert zusätzlich ein idempotentes Importskript, das eine bereits laufende Datenbank gezielt aktualisieren kann.
+Der erste Artikel wird beim initialen Start aus einer Markdown-Datei geseedet. Ist der Artikel bereits vorhanden, wird er beim Neustart nicht überschrieben.
 
 ## Sicherheitskonzept der ersten Version
 
@@ -170,3 +170,7 @@ Das Interface verwendet eine dunkle, sachliche Entwickler-Ästhetik mit:
 - Fokus auf langen, gut lesbaren Fachartikeln
 
 Die Gestaltung soll wie eine technische Dokumentationsplattform wirken, nicht wie ein Marketing-Blog.
+
+## Base-Path Deployment
+
+Die Anwendung verwendet ausschließlich `APP_BASE_URL` als öffentliche URL-Konfiguration. Vite leitet daraus beim Build den Asset-Pfad ab; Navigation und API-Aufrufe verwenden dieselbe Basis. Nginx erhält denselben abgeleiteten Pfad und routet dessen `/api/*`-Bereich intern zum Backend. Fehlt `APP_BASE_URL`, wird der Repository-Name als Unterpfad verwendet. In Dokploy wird der entsprechende Pfad als Domain-Path mit deaktiviertem Strip Path konfiguriert.

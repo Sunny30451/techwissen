@@ -1,0 +1,14 @@
+# Ergänzung zur Basis-Compose-Datei, wenn Ollama aus einem separaten
+# Dokploy/Compose-Projekt über das externe Netz ollama-internal genutzt wird.
+
+services:
+  n8n:
+    networks:
+      - n8n-private
+      - n8n-egress
+      - ollama-internal
+
+networks:
+  ollama-internal:
+    external: true
+    name: ollama-internal

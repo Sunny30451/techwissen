@@ -1,5 +1,5 @@
+import { appUrl } from '../config.js';
 import Icon from './Icon.jsx';
-import { appUrl } from '../app-url.js';
 
 export default function ArticleCard({ article, featured = false }) {
   return (
@@ -13,12 +13,18 @@ export default function ArticleCard({ article, featured = false }) {
       <div className="tag-row">
         {article.tags?.slice(0, 5).map((tag) => <span key={tag.slug}>{tag.name}</span>)}
       </div>
+      {(article.repository_url || article.has_package) && (
+        <div className="card-resource-row">
+          {article.repository_url && <span>Repository</span>}
+          {article.has_package && <span>Dokploy ZIP</span>}
+        </div>
+      )}
       <div className="card-footer">
         <div className="meta-inline">
           <span><Icon name="clock" size={16} /> {article.reading_time_minutes} Min.</span>
           <span>{article.difficulty}</span>
         </div>
-        <a className="read-link" href={appUrl(`artikel/${article.slug}`)}>
+        <a className="read-link" href={appUrl(`/artikel/${article.slug}`)}>
           Lesen <Icon name="arrow" size={17} />
         </a>
       </div>
