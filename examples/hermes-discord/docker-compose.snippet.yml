@@ -1,0 +1,25 @@
+services:
+  hermes:
+    environment:
+      DISCORD_BOT_TOKEN: ${DISCORD_BOT_TOKEN:?DISCORD_BOT_TOKEN must be set}
+      DISCORD_ALLOWED_USERS: ${DISCORD_ALLOWED_USERS:-}
+      DISCORD_ALLOWED_ROLES: ${DISCORD_ALLOWED_ROLES:-}
+      DISCORD_ALLOWED_CHANNELS: ${DISCORD_ALLOWED_CHANNELS:?DISCORD_ALLOWED_CHANNELS must be set}
+      DISCORD_FREE_RESPONSE_CHANNELS: ${DISCORD_FREE_RESPONSE_CHANNELS:-}
+      DISCORD_REQUIRE_MENTION: ${DISCORD_REQUIRE_MENTION:-true}
+      DISCORD_HOME_CHANNEL: ${DISCORD_HOME_CHANNEL:-}
+      DISCORD_HOME_CHANNEL_NAME: ${DISCORD_HOME_CHANNEL_NAME:-hermes}
+      DISCORD_ALLOW_ALL_USERS: ${DISCORD_ALLOW_ALL_USERS:-false}
+
+    # Hermes braucht Egress zu Discord.
+    # ollama-internal bleibt für den bestehenden Ollama-Dienst erhalten.
+    networks:
+      - hermes-egress
+      - ollama-internal
+
+networks:
+  hermes-egress:
+    driver: bridge
+
+  ollama-internal:
+    external: true

@@ -1,0 +1,72 @@
+{
+  "count": 9,
+  "articles": [
+    {
+      "file": "dev-container-guide.md",
+      "title": "Universelle Docker-Entwicklungsumgebung auf Contabo mit Dokploy",
+      "sha256": "d5e032619e923360572ff36651e05af0e58750ed455b08f4698bcd3fc8935920"
+    },
+    {
+      "file": "ollama-dokploy-contabo.md",
+      "title": "Ollama sicher mit Docker und Dokploy auf einem Contabo VPS bereitstellen",
+      "sha256": "79e814755b2df78b3f92bbec5dd09db882bc9911e106fa05e8ead9395a87622d"
+    },
+    {
+      "file": "n8n-dokploy-contabo.md",
+      "title": "n8n mit Docker und Dokploy auf einem Contabo VPS bereitstellen",
+      "sha256": "2320b953673883d85c2bb36126fe99d70869bc3422e7c0927b2611dc2d7c0081"
+    },
+    {
+      "file": "n8n-praxis-ollama-workflows.md",
+      "title": "n8n praktisch nutzen: Alltagsautomationen mit Ollama im Docker-/Dokploy-Setup",
+      "sha256": "c24c570db0591f801af59ecc1d62ddad55649d9ce68922eecf4974845c145150"
+    },
+    {
+      "file": "hermes-agent-dokploy-contabo.md",
+      "title": "Hermes Agent mit Docker und Dokploy auf einem Contabo VPS bereitstellen",
+      "sha256": "4a187e3e2d2a657474077e9eb93b029f882c147c87d74b26404ba269f9b83e9f"
+    },
+    {
+      "file": "nextcloud-dokploy-contabo.md",
+      "title": "Nextcloud mit Docker und Dokploy auf einem Contabo VPS bereitstellen",
+      "sha256": "4d548f890858be380c3ddef192f9f527b84b6a2485319c2214e357fc9cd70144"
+    },
+    {
+      "file": "windows-hyperv-contabo.md",
+      "title": "Windows Hyper-V und virtuelle Maschinen auf Contabo einrichten",
+      "sha256": "dc07b2f4056d8d8cb65f0a973d95e37b4be5f31b107063ee7ee363211a46bf01"
+    },
+    {
+      "file": "discord-server-einrichten-contabo-dokploy.md",
+      "title": "Discord-Server einrichten, absichern und mit Contabo/Dokploy integrieren",
+      "sha256": "f177c115f3077f95c20d0f1ad3b50200108411df9af55fb3dfec83a92f3586f1"
+    },
+    {
+      "file": "hermes-discord-integration.md",
+      "title": "Hermes Agent mit einem Discord-Server verbinden und in einem eigenen Kanal bereitstellen",
+      "sha256": "cb11cf24a0a38bfa9057ab61a6e0139dc837fd4f3c9781fedd7258f558b1d4b2"
+    }
+  ],
+  "packages": [
+    {
+      "file": "hermes-dokploy.zip",
+      "sha256": "2ff462485f51cfc75947d1b9404d8e80d1e699c0e06359c25175df6c02eab02d",
+      "sizeBytes": 5833
+    },
+    {
+      "file": "n8n-praxis-workflows.zip",
+      "sha256": "67713e092776ff36fed3931dc4590d98a5837b5593ea9d77ee1ce7a3290c7c87",
+      "sizeBytes": 13046
+    },
+    {
+      "file": "nextcloud-dokploy.zip",
+      "sha256": "0c72c8ae91141f422c0d2912c31f7e19e57f8dde1efd97d612bfd8da7d332775",
+      "sizeBytes": 6144
+    },
+    {
+      "file": "windows-hyperv-toolkit.zip",
+      "sha256": "74258ece371dc46d5503103c48019688abcde1f3e5c1397eb64db4bc1c5c29f9",
+      "sizeBytes": 5496
+    }
+  ]
+}

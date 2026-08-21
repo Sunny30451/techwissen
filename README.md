@@ -312,3 +312,43 @@ HTTPS:          ON
 ```
 
 Alle App-Routen werden relativ zu diesem Prefix erzeugt: `/admin`, `/artikel/<slug>` und `/api/...`. Eine Änderung von `APP_BASE_URL` erfordert einen vollständigen Frontend-Rebuild/Redeploy, da Vite den Base-Pfad in die Build-Artefakte einbettet.
+
+
+## n8n Praxisworkflows mit Ollama
+
+Der zusätzliche TechWissen-Artikel `n8n-praxis-alltagsautomationen-ollama` wird idempotent importiert mit:
+
+```bash
+npm run import:n8n-praxis
+```
+
+Das Importskript hängt zugleich `n8n-praxis-workflows.zip` als Artikelpaket an. Das ZIP enthält sechs n8n-Workflows sowie einen API-basierten Installer.
+
+## Hermes Agent Artikel
+
+Der Artikel `hermes-agent-docker-dokploy-contabo` beschreibt die Bereitstellung von Nous Research Hermes Agent auf dem Contabo-/Dokploy-Host. Er enthält ein zugeordnetes `hermes-dokploy.zip` und verweist auf das offizielle Repository.
+
+Idempotenter Import:
+
+```bash
+npm run import:hermes
+```
+
+oder im laufenden Compose-Backend:
+
+```bash
+docker compose exec backend npm run import:hermes
+```
+
+Das Importskript upsertet Kategorie, Artikel und Tags, persistiert `repository_url` und hängt das quellversionierte Dokploy-ZIP an den Artikel an.
+
+## Konsolidierter Artikelstand
+
+Der aktuelle Quellstand enthält neun TechWissen-Artikel und einen zentralen Sammelimport:
+
+```bash
+cd backend
+npm run import:all-articles
+```
+
+Der Import ist idempotent und synchronisiert Kategorien, Artikel, Tags, Repository-URLs sowie vorhandene Artikel-ZIP-Pakete. Details stehen in `SOURCE-STAND.md` und `ARTICLES-MANIFEST.json`.
