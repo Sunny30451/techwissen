@@ -7,7 +7,14 @@
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
     "import:ollama": "node scripts/import-ollama-article.js",
-    "import:n8n": "node scripts/import-n8n-article.js"
+    "import:n8n": "node scripts/import-n8n-article.js",
+    "import:n8n-praxis": "node scripts/import-n8n-praxis-article.js",
+    "import:hermes": "node scripts/import-hermes-article.js",
+    "import:nextcloud": "node scripts/import-nextcloud-article.js",
+    "import:hyperv": "node scripts/import-windows-hyperv-article.js",
+    "import:discord": "node scripts/import-discord-article.js",
+    "import:hermes-discord": "node scripts/import-hermes-discord-article.js",
+    "import:all-articles": "node scripts/import-all-articles.js"
   },
   "dependencies": {
     "express": "5.2.1",
